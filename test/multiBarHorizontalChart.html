@@ -40,6 +40,11 @@ text {
     <svg></svg>
   </div>
 
+  <div id="chart3" class='chart'>
+    Chart with overlapped stacked bars
+    <svg></svg>
+  </div>
+
 <script src="../bower_components/d3/d3.js"></script>
 <script src="../build/nv.d3.js"></script>
 <script src="../src/utils.js"></script>
@@ -409,6 +414,101 @@ nv.addGraph(function() {
   nv.utils.windowResize(chart.update);
 
   return chart;
+});
+
+var stack_overlapped_test_data = [
+    {
+        "key": "1-in-50yr Gain",
+        "values": [
+            { "x": "A", "y": 5.2 },
+            { "x": "B", "y": 4.5 },
+            { "x": "C", "y": 6.1 },
+        ],
+    },
+    {
+        "key": "1-in-100yr Gain",
+        "values": [
+            { "x": "A", "y": 7.7 },
+            { "x": "B", "y": 8.5 },
+            { "x": "C", "y": 7.1 },
+        ]
+    },
+    {
+        "key": "1-in-200yr Gain",
+        "values": [
+            { "x": "A", "y": 8.1 },
+            { "x": "B", "y": 8.6 },
+            { "x": "C", "y": 8.2 },
+        ]
+    },
+    {
+        "key": "1-in-50yr Loss",
+        "values": [
+            { "x": "A", "y": -6.1 },
+            { "x": "B", "y": -4.3 },
+            { "x": "C", "y": -5.8 },
+        ]
+    },
+    {
+        "key": "1-in-100yr Loss",
+        "values": [
+            { "x": "A", "y": -7.8 },
+            { "x": "B", "y": -4.9 },
+            { "x": "C", "y": -5.9 },
+        ]
+    },
+    {
+        "key": "1-in-200yr Loss",
+        "values": [
+            { "x": "A", "y": -8.9 },
+            { "x": "B", "y": -6.2 },
+            { "x": "C", "y": -6.3 },
+        ]
+    }
+];
+
+function dataColour(d) {
+    switch (d.key) {
+        case "1-in-50yr Gain":
+            return "rgb(13,132,0)";
+            break;
+        case "1-in-100yr Gain":
+            return "rgb(20,190,0)";
+            break;
+        case "1-in-200yr Gain":
+            return "rgb(26,243,0)";
+            break;
+        case "1-in-50yr Loss":
+            return "rgb(132,13,0)";
+            break;
+        case "1-in-100yr Loss":
+            return "rgb(190,20,0)";
+            break;
+        case "1-in-200yr Loss":
+            return "rgb(243,26,0)";
+            break;
+        default:
+            return "yellow";
+    };
+};
+
+nv.addGraph(function() {
+
+    var chart = nv.models.multiBarHorizontalChart()
+        .margin({top: 60, right: 30, bottom: 30, left: 30})
+        .showControls(true)
+        .groupSpacing(0.05)
+        .color(dataColour)
+        .stacked(true)
+        .stackOverlapped(true);
+
+    chart.yAxis.tickValues([-10, -5, 0, 5, 10]);
+
+    d3.select("#chart3 svg").datum(stack_overlapped_test_data).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
 });
 
 </script>
