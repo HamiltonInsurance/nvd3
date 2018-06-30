@@ -284,7 +284,7 @@ nv.models.multiBarHorizontal = function() {
                     .style('fill', function(d) { return this.parentNode.style.fill; })
                     .style('stroke', function(d) { return this.parentNode.style.stroke; });
 
-                bars = d3.selectAll('g.nv-bar')
+                bars = wrap.selectAll('g.nv-bar')
                     .sort(function(a,b) { return d3.descending(Math.abs(getY(a)), Math.abs(getY(b))); })
             }
 
