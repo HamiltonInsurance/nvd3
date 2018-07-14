@@ -79,13 +79,9 @@ nv.models.discreteBar = function() {
             // Setup Scales
             // remap and flatten the data for use in calculating the scales' domains
             var seriesData = (xDomain && yDomain) ? [] : // if we know xDomain and yDomain, no need to calculate
-                data.map(function(series, iSeries) {
-                    return series.values.map(function(d,i) {
-                        return {
-                            x: getX(d,i),
-                            y: getY(d,i),
-                            y0: d.y0
-                        };
+                data.map(function(d) {
+                    return d.values.map(function(d,i) {
+                        return { x: getX(d,i), y: getY(d,i), y0: d.y0 }
                     })
                 });
 
