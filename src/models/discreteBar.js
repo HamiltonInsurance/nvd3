@@ -64,7 +64,7 @@ nv.models.discreteBar = function() {
                     point.series = iSeries;
                 });
             });
-            
+
             if (waterfall) {
                 var oldGetX = getX;
                 getX = function(d,i) {
