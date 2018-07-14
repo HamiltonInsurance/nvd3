@@ -21,7 +21,6 @@ nv.models.multiBarHorizontal = function() {
         , barColor = null // adding the ability to set the color for each rather than the whole group
         , disabled // used in conjunction with barColor to communicate from multiBarHorizontalChart what series are disabled
         , stacked = false
-        , stackOverlapped = false
         , showValues = false
         , showBarLabels = false
         , valuePadding = 60
@@ -54,19 +53,11 @@ nv.models.multiBarHorizontal = function() {
             nv.utils.initSVG(container);
 
             if (stacked)
-                if (stackOverlapped)
-                    data.forEach(function(series, i) {
-                        series.values.forEach(function(point) {
-                            point.y0 = 0;
-                            point.y1 = Math.min(getY(point),0);
-                        });
-                    });
-                else
-                    data = d3.layout.stack()
-                        .offset('zero')
-                        .values(function(d){ return d.values })
-                        .y(getY)
-                    (data);
+                data = d3.layout.stack()
+                    .offset('zero')
+                    .values(function(d){ return d.values })
+                    .y(getY)
+                (data);
 
             //add series index and key to each data point for reference
             data.forEach(function(series, i) {
@@ -77,7 +68,7 @@ nv.models.multiBarHorizontal = function() {
             });
 
             // HACK for negative value stacking
-            if (stacked && !stackOverlapped)
+            if (stacked)
                 data[0].values.map(function(d,i) {
                     var posBase = 0, negBase = 0;
                     data.map(function(d) {
@@ -275,19 +266,6 @@ nv.models.multiBarHorizontal = function() {
                     .style('stroke', function(d,i,j) { return d3.rgb(barColor(d,i)).darker(  disabled.map(function(d,i) { return i }).filter(function(d,i){ return !disabled[i]  })[j]   ).toString(); });
             }
 
-            if (stackOverlapped) {
-                // When overlapping stacked bars, sort all series together by absolute
-                // value. This makes sure that shorter bars are drawn on top of longer
-                // ones. Make sure to then preserve any per-series attributes which no
-                // longer inherit from the group node.
-                bars
-                    .style('fill', function(d) { return this.parentNode.style.fill; })
-                    .style('stroke', function(d) { return this.parentNode.style.stroke; });
-
-                bars = wrap.selectAll('g.nv-bar')
-                    .sort(function(a,b) { return d3.descending(Math.abs(getY(a)), Math.abs(getY(b))); })
-            }
-
             if (stacked)
                 bars.watchTransition(renderWatch, 'multibarhorizontal: bars')
                     .attr('transform', function(d,i) {
@@ -349,7 +327,6 @@ nv.models.multiBarHorizontal = function() {
         yRange:  {get: function(){return yRange;}, set: function(_){yRange=_;}},
         forceY:  {get: function(){return forceY;}, set: function(_){forceY=_;}},
         stacked: {get: function(){return stacked;}, set: function(_){stacked=_;}},
-        stackOverlapped: {get: function(){return stackOverlapped;}, set: function(_){stackOverlapped=_;}},
         showValues: {get: function(){return showValues;}, set: function(_){showValues=_;}},
         // this shows the group name, seems pointless?
         //showBarLabels:    {get: function(){return showBarLabels;}, set: function(_){showBarLabels=_;}},
