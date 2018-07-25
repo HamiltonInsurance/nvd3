@@ -9,7 +9,7 @@ nv.models.discreteBarChart = function() {
     var discretebar = nv.models.discreteBar()
         , xAxis = nv.models.axis()
         , yAxis = nv.models.axis()
-	, legend = nv.models.legend()
+        , legend = nv.models.legend()
         , tooltip = nv.models.tooltip()
         ;
 
@@ -18,7 +18,7 @@ nv.models.discreteBarChart = function() {
         , width = null
         , height = null
         , color = nv.utils.getColor()
-	, showLegend = false
+        , showLegend = false
         , showXAxis = true
         , showYAxis = true
         , rightAlignYAxis = false
@@ -87,7 +87,7 @@ nv.models.discreteBarChart = function() {
 
             // Setup Scales
             x = discretebar.xScale();
-            y = discretebar.yScale().clamp(true);
+            y = discretebar.yScale().clamp(false);
 
             // Setup containers and skeleton of chart
             var wrap = container.selectAll('g.nv-wrap.nv-discreteBarWithAxes').data([data]);
@@ -101,7 +101,7 @@ nv.models.discreteBarChart = function() {
                 .append('line');
 
             gEnter.append('g').attr('class', 'nv-barsWrap');
-	    gEnter.append('g').attr('class', 'nv-legendWrap');
+            gEnter.append('g').attr('class', 'nv-legendWrap');
 
             g.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 

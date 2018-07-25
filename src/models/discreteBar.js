@@ -27,6 +27,7 @@ nv.models.discreteBar = function() {
         , dispatch = d3.dispatch('chartClick', 'elementClick', 'elementDblClick', 'elementMouseover', 'elementMouseout', 'elementMousemove', 'renderEnd')
         , rectClass = 'discreteBar'
         , duration = 250
+        , waterfall = false
         ;
 
     //============================================================
@@ -46,11 +47,34 @@ nv.models.discreteBar = function() {
             nv.utils.initSVG(container);
 
             //add series index to each data point for reference
-            data.forEach(function(series, i) {
-                series.values.forEach(function(point) {
-                    point.series = i;
+            var runningTotal = 0;
+            data.forEach(function(series, iSeries) {
+                series.values.forEach(function(point,i) {
+                    if (waterfall) {
+                        point.seriesKey = series.key || iSeries;
+                        point.runningTotal = runningTotal
+                        point.y0 = (waterfall && !point.total) ? runningTotal : 0;
+                        if (point.total) {
+                            runningTotal = getY(point,i) || runningTotal;
+                        }
+                        else {
+                            runningTotal += getY(point,i);
+                        }
+                    }
+                    point.series = iSeries;
                 });
             });
+
+            if (waterfall) {
+                var oldGetX = getX;
+                getX = function(d,i) {
+                    return d.total ? d.seriesKey : oldGetX(d,i) + " - " + d.seriesKey;
+                };
+                var oldGetY = getY;
+                getY = function(d,i) {
+                    return d.total ? (oldGetY(d,i) || d.runningTotal) : oldGetY(d,i);
+                };
+            }
 
             // Setup Scales
             // remap and flatten the data for use in calculating the scales' domains
@@ -63,7 +87,7 @@ nv.models.discreteBar = function() {
 
             x   .domain(xDomain || d3.merge(seriesData).map(function(d) { return d.x }))
                 .rangeBands(xRange || [0, availableWidth], .1);
-            y   .domain(yDomain || d3.extent(d3.merge(seriesData).map(function(d) { return d.y }).concat(forceY)));
+            y   .domain(yDomain || d3.extent(d3.merge(seriesData).map(function(d) { return d.y + d.y0 }).concat(forceY)));
 
             // If showValues, pad the Y axis range to account for label height
             if (showValues) y.range(yRange || [availableHeight - (y.domain()[0] < 0 ? 12 : 0), y.domain()[1] > 0 ? 12 : 0]);
@@ -152,9 +176,10 @@ nv.models.discreteBar = function() {
                     d3.event.stopPropagation();
                 });
 
+            var barsPerGroup = waterfall ? 1 : data.length;
             barsEnter.append('rect')
                 .attr('height', 0)
-                .attr('width', x.rangeBand() * .9 / data.length )
+                .attr('width', x.rangeBand() * .9 / barsPerGroup )
 
             if (showValues) {
                 barsEnter.append('text')
@@ -180,16 +205,16 @@ nv.models.discreteBar = function() {
                 .attr('rx', cornerRadius)
                 .attr('class', rectClass)
                 .watchTransition(renderWatch, 'discreteBar: bars rect')
-                .attr('width', x.rangeBand() * .9 / data.length);
+                .attr('width', x.rangeBand() * .9 / barsPerGroup);
             bars.watchTransition(renderWatch, 'discreteBar: bars')
                 //.delay(function(d,i) { return i * 1200 / data[0].values.length })
                 .attr('transform', function(d,i) {
                     var left = x(getX(d,i)) + x.rangeBand() * .05,
                         top = getY(d,i) < 0 ?
-                            y(0) :
+                            y(d.y0) :
                                 y(0) - y(getY(d,i)) < 1 ?
-                            y(0) - 1 : //make 1 px positive bars show up above y=0
-                            y(getY(d,i));
+                                    y(d.y0) - 1 : //make 1 px positive bars show up above y=0
+                                    y(d.y0 + getY(d,i));
 
                     return 'translate(' + left + ', ' + top + ')'
                 })
@@ -234,6 +259,7 @@ nv.models.discreteBar = function() {
         valueFormat:    {get: function(){return valueFormat;}, set: function(_){valueFormat=_;}},
         id:          {get: function(){return id;}, set: function(_){id=_;}},
         rectClass: {get: function(){return rectClass;}, set: function(_){rectClass=_;}},
+        waterfall: {get: function(){return waterfall;}, set: function(_){waterfall=_;}},
 
         // options that require extra logic in the setter
         margin: {get: function(){return margin;}, set: function(_){
