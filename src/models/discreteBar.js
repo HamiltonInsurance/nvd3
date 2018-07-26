@@ -28,6 +28,8 @@ nv.models.discreteBar = function() {
         , rectClass = 'discreteBar'
         , duration = 250
         , waterfall = false
+	, getX_orig = undefined
+	, getY_orig = undefined
         ;
 
     //============================================================
@@ -66,13 +68,15 @@ nv.models.discreteBar = function() {
             });
 
             if (waterfall) {
-                var oldGetX = getX;
+                if (!getX_orig)
+                    getX_orig = getX;
                 getX = function(d,i) {
-                    return d.total ? d.seriesKey : oldGetX(d,i) + " - " + d.seriesKey;
+                    return d.total ? d.seriesKey : getX_orig(d,i) + " - " + d.seriesKey;
                 };
-                var oldGetY = getY;
+                if (!getY_orig)
+                    getY_orig = getY;
                 getY = function(d,i) {
-                    return d.total ? (oldGetY(d,i) || d.runningTotal) : oldGetY(d,i);
+                    return d.total ? (getY_orig(d,i) || d.runningTotal) : getY_orig(d,i);
                 };
             }
 
