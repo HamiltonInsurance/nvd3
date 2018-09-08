@@ -348,7 +348,7 @@ nv.models.scatter = function() {
                         if (needsUpdate) return 0;
                         var series = data[d.series];
                         if (series === undefined) return;
-                        var point  = series.values[d.point];
+                        var point = Object.assign({}, series.values[d.point]);
                         point['color'] = color(series, d.series);
 
                         // standardize attributes for tooltip.
