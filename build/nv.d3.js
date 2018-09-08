@@ -1,4 +1,4 @@
-/* nvd3 version 1.8.6-dev (https://github.com/novus/nvd3) 2018-07-25 */
+/* nvd3 version 1.8.6-dev (https://github.com/novus/nvd3) 2018-09-08 */
 (function(){
 
 // set up main nv object
@@ -4498,6 +4498,8 @@ nv.models.discreteBar = function() {
         , rectClass = 'discreteBar'
         , duration = 250
         , waterfall = false
+	, getX_orig = undefined
+	, getY_orig = undefined
         ;
 
     //============================================================
@@ -4536,13 +4538,15 @@ nv.models.discreteBar = function() {
             });
 
             if (waterfall) {
-                var oldGetX = getX;
+                if (!getX_orig)
+                    getX_orig = getX;
                 getX = function(d,i) {
-                    return d.total ? d.seriesKey : oldGetX(d,i) + " - " + d.seriesKey;
+                    return d.total ? d.seriesKey : getX_orig(d,i) + " - " + d.seriesKey;
                 };
-                var oldGetY = getY;
+                if (!getY_orig)
+                    getY_orig = getY;
                 getY = function(d,i) {
-                    return d.total ? (oldGetY(d,i) || d.runningTotal) : oldGetY(d,i);
+                    return d.total ? (getY_orig(d,i) || d.runningTotal) : getY_orig(d,i);
                 };
             }
 
@@ -16050,7 +16054,7 @@ nv.models.scatter = function() {
                         if (needsUpdate) return 0;
                         var series = data[d.series];
                         if (series === undefined) return;
-                        var point  = series.values[d.point];
+                        var point = Object.assign({}, series.values[d.point]);
                         point['color'] = color(series, d.series);
 
                         // standardize attributes for tooltip.
